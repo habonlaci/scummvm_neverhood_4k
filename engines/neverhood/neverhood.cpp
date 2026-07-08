@@ -69,7 +69,10 @@ NeverhoodEngine::~NeverhoodEngine() {
 }
 
 Common::Error NeverhoodEngine::run() {
-	initGraphics(UPSCALE(640, 480));
+	// Must match Screen's 32bpp backbuffer format; the default CLUT8 screen
+	// garbles the 32bpp blits and Theora replacement videos.
+	Graphics::PixelFormat screenFormat(4, 8, 8, 8, 8, 0, 8, 16, 24);
+	initGraphics(UPSCALE(640, 480), &screenFormat);
 
 	const Common::FSNode gameDataDir(ConfMan.get("path"));
 

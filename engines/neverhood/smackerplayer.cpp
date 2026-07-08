@@ -131,6 +131,9 @@ void SmackerPlayer::open(uint32 fileHash, bool keepLastFrame) {
 	_stream = _vm->_res->createStream(fileHash);
 
 	_smackerDecoder = new NeverhoodSmackerDecoder();
+	// Convert Theora output straight to the backbuffer format, else the
+	// YUV->RGB conversion targets a mismatched layout and blits garbage.
+	_smackerDecoder->setDefaultHighColorFormat(Graphics::PixelFormat(4, 8, 8, 8, 8, 0, 8, 16, 24));
 	_smackerDecoder->loadStream(file);//_stream);
 
 	_palette = new Palette(_vm);
