@@ -139,7 +139,9 @@ void AnimResource::draw(uint frameIndex, Graphics::Surface *destSurface, bool fl
 	_height = frameInfo.drawOffset.height;
 
 	if (_resourceHandle.upscaledData(frameIndex))
-		unpackSpriteUpscaled(_currSpriteData, _width, _height, dest, destPitch, flipX, flipY, destSurface->GetRgbOffset());
+		// Use the PNG buffer pointer directly: a 32-bit offset between the
+		// upscaled and original heap buffers truncates on 64-bit builds.
+		unpackSpriteUpscaled(_resourceHandle.upscaledData(frameIndex), _width, _height, dest, destPitch, flipX, flipY, destSurface->GetRgbOffset());
 	else if (_replEnabled && _replOldColor != _replNewColor)
 		unpackSpriteRle(_currSpriteData, _width, _height, dest, destPitch, flipX, flipY, _replOldColor, _replNewColor);
 	else
@@ -233,7 +235,9 @@ bool AnimResource::load(uint32 fileHash) {
 			frameInfo.collisionBoundsOffset.y = UPSCALE_Y(frameInfo.collisionBoundsOffset.y);
 			frameInfo.collisionBoundsOffset.width = UPSCALE_X(frameInfo.collisionBoundsOffset.width);
 			frameInfo.collisionBoundsOffset.height = UPSCALE_Y(frameInfo.collisionBoundsOffset.height);
-			frameInfo.spriteDataOffs = _resourceHandle.upscaledData(frameIndex) - _spriteData; // TODO: 64 bit @@SB
+			// spriteDataOffs stays the original-data offset; draw() fetches
+			// the upscaled PNG buffer straight from the resource handle
+			// (a 32-bit pointer difference truncates on 64-bit builds).
 		}
 
 		_frames.push_back(frameInfo);
