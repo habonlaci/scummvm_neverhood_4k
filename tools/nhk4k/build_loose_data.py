@@ -52,20 +52,44 @@ def upscale_one(src, dst, factor):
     return dst
 
 
+FFMPEG2THEORA = r"C:\Users\apa\neverhood4k\aitools\ffmpeg2theora.exe"
+
+
 def convert_video(ffmpeg, src, dst, factor, quality):
-    cmd = [ffmpeg, "-y", "-loglevel", "error", "-i", src,
-           "-vf", f"scale=iw*{factor}:ih*{factor}:flags=lanczos,format=yuv420p",
-           "-c:v", "libtheora", "-q:v", str(quality)]
-    # some SMKs have no audio track; map audio only if present
+    # MSYS2's libtheora 1.2.0 encoder emits corrupt bitstreams on multi-frame
+    # streams (unpack_block_qpis decode errors), so encode video through the
+    # standalone ffmpeg2theora (libtheora 1.2.0alpha Ptalarbvorm) via a
+    # yuv4mpeg pipe, then mux audio (if any) with ffmpeg stream-copy.
+    # Fullscreen cutscenes are 320x240 sources the original engine doubled to
+    # 640x480; the n4k engine blits replacement frames 1:1, so they need 2x
+    # the factor. Other videos play at native game-space size -> plain factor.
+    probe0 = subprocess.run([ffmpeg, "-i", src], capture_output=True, text=True)
+    eff = factor * 2 if " 320x240" in probe0.stderr else factor
+    tmp = dst + ".video.ogv"
+    dec = subprocess.Popen(
+        [ffmpeg, "-y", "-loglevel", "error", "-i", src,
+         "-vf", f"scale=iw*{eff}:ih*{eff}:flags=lanczos,format=yuv420p",
+         "-f", "yuv4mpegpipe", "-"],
+        stdout=subprocess.PIPE)
+    enc = subprocess.run(
+        [FFMPEG2THEORA, "-", "-v", str(quality), "--no-skeleton", "-o", tmp],
+        stdin=dec.stdout, capture_output=True, text=True)
+    dec.stdout.close()
+    dec.wait()
+    if enc.returncode != 0 or dec.returncode != 0 or not os.path.isfile(tmp):
+        raise RuntimeError(f"{os.path.basename(src)}: {enc.stderr.strip()[-200:]}")
     probe = subprocess.run([ffmpeg, "-i", src], capture_output=True, text=True)
     if "Audio:" in probe.stderr:
-        cmd += ["-c:a", "libvorbis", "-q:a", "4"]
+        mux = subprocess.run(
+            [ffmpeg, "-y", "-loglevel", "error", "-i", tmp, "-i", src,
+             "-map", "0:v:0", "-map", "1:a:0", "-c:v", "copy",
+             "-c:a", "libvorbis", "-q:a", "4", dst],
+            capture_output=True, text=True)
+        os.remove(tmp)
+        if mux.returncode != 0:
+            raise RuntimeError(f"{os.path.basename(src)} mux: {mux.stderr.strip()[-200:]}")
     else:
-        cmd += ["-an"]
-    cmd.append(dst)
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
-        raise RuntimeError(f"{os.path.basename(src)}: {r.stderr.strip()[-200:]}")
+        os.replace(tmp, dst)
     return dst
 
 
