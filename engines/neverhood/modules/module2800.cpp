@@ -732,10 +732,10 @@ Scene2803::Scene2803(NeverhoodEngine *vm, Module *parentModule, int which)
 		klaymenStairs();
 	} else if (which == 6) {
 		_asRope = insertSprite<AsScene2803Rope>(this, 384);
-		_asRope->setClipRect(0, 25, UPSCALE(640, 480));
+		_asRope->setClipRect(UPSCALE(0, 25), UPSCALE(640, 480));
 		insertKlaymen<KmScene2803>(UPSCALE(384, 0), _clipRectsFloor, 2);
 		sendEntityMessage(_klaymen, 0x1014, _asRope);
-		_klaymen->setClipRect(0, 25, UPSCALE(640, 480));
+		_klaymen->setClipRect(UPSCALE(0, 25), UPSCALE(640, 480));
 		setMessageList(0x004B7A78);
 		klaymenFloor();
 	} else if (which == 2) {
@@ -2106,7 +2106,7 @@ Scene2822::Scene2822(NeverhoodEngine *vm, Module *parentModule, int which)
 	SetUpdateHandler(&Scene2822::update);
 	_background = new Background(_vm, 0xD542022E, 0, 0);
 	addBackground(_background);
-	_background->getSurface()->getDrawRect().y = -10;
+	_background->getSurface()->getDrawRect().y = UPSCALE_Y(-10);
 	setPalette(0xD542022E);
 	insertPuzzleMouse(0x2022AD5C, UPSCALE_X(20), UPSCALE_X(620));
 	_ssButton = insertStaticSprite(0x1A4D4120, 1100);
@@ -2117,7 +2117,7 @@ Scene2822::Scene2822(NeverhoodEngine *vm, Module *parentModule, int which)
 void Scene2822::update() {
 
 	static const int16 kScene2822BackgroundYPositions[] = {
-		0, -20, -5, -15, -8, -12, -9, -11, -10, 0
+		UPSCALE_Y(0), UPSCALE_Y(-20), UPSCALE_Y(-5), UPSCALE_Y(-15), UPSCALE_Y(-8), UPSCALE_Y(-12), UPSCALE_Y(-9), UPSCALE_Y(-11), UPSCALE_Y(-10), UPSCALE_Y(0)
 	};
 
 	Scene::update();
@@ -2140,7 +2140,7 @@ void Scene2822::update() {
 				_background->getSurface()->getDrawRect().y = kScene2822BackgroundYPositions[_scrollIndex];
 				_scrollIndex++;
 			} else {
-				_background->getSurface()->getDrawRect().y = -10;
+				_background->getSurface()->getDrawRect().y = UPSCALE_Y(-10);
 			}
 		}
 	}

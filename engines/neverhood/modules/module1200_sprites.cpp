@@ -566,7 +566,7 @@ AsScene1201LeftDoor::AsScene1201LeftDoor(NeverhoodEngine *vm, Sprite *klaymen)
 	_x = UPSCALE_X(320);
 	_y = UPSCALE_Y(240);
 	createSurface(800, UPSCALE(55, 199));
-	if (_klaymen->getX() < 100) {
+	if (_klaymen->getX() < UPSCALE_X(100)) {
 		startAnimation(0x508A111B, 0, -1);
 		_newStickFrameIndex = STICK_LAST_FRAME;
 		playSound(0, calcHash("fxDoorOpen03"));

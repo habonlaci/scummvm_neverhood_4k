@@ -304,8 +304,8 @@ uint32 AsScene3009HorizontalIndicator::handleMessage(int messageNum, const Messa
 }
 
 void AsScene3009HorizontalIndicator::suMoveLeft() {
-	_x -= 6;
-	if (_x < 92) {
+	_x -= UPSCALE_X(6);
+	if (_x < UPSCALE_X(92)) {
 		SetSpriteUpdate(nullptr);
 		_x = UPSCALE_X(92);
 	}

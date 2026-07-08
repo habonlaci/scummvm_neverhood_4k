@@ -1259,7 +1259,7 @@ uint32 Scene2207::handleMessage(int messageNum, const MessageParam &param, Entit
 		break;
 	case 0x4826:
 		if (sender == _asTape) {
-			if (_klaymen->getY() == 423) {
+			if (_klaymen->getY() == UPSCALE_Y(423)) {
 				sendEntityMessage(_klaymen, 0x1014, _asTape);
 				setMessageList(0x004B3958);
 			}
@@ -1673,7 +1673,7 @@ void HallOfRecordsScene::readClickedColumn() {
 }
 
 static const int16 kScene2247XPositions[] = {
-	513, 602
+	UPSCALE_X(513), UPSCALE_X(602)
 };
 
 static const uint32 kScene2247MessageListIds2[] = {
@@ -1712,7 +1712,7 @@ Scene2247::Scene2247(NeverhoodEngine *vm, Module *parentModule, int which)
 		setMessageList(0x004B5438);
 	} else if (which == 2) {
 		// Klaymen returning from reading a text column
-		insertKlaymen<KmScene2247>(UPSCALE(kScene2247XPositions[getGlobalVar(V_COLUMN_TEXT_NAME) == 0x0008E486 ? 0 : 1], 430));
+		insertKlaymen<KmScene2247>(kScene2247XPositions[getGlobalVar(V_COLUMN_TEXT_NAME) == 0x0008E486 ? 0 : 1], UPSCALE_Y(430));
 		if (getGlobalVar(V_KLAYMEN_IS_DELTA_X))
 			_klaymen->setDoDeltaX(1);
 		setMessageList(0x004B5530);

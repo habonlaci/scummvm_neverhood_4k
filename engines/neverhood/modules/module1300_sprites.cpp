@@ -84,7 +84,7 @@ SsScene1302Fence::SsScene1302Fence(NeverhoodEngine *vm)
 
 	_firstY = _y;
 	if (getGlobalVar(V_FLYTRAP_RING_FENCE))
-		_y += 152;
+		_y += UPSCALE_Y(152);
 	loadSound(0, 0x7A00400C);
 	loadSound(1, 0x78184098);
 	SetUpdateHandler(&SsScene1302Fence::update);
@@ -117,8 +117,8 @@ uint32 SsScene1302Fence::handleMessage(int messageNum, const MessageParam &param
 }
 
 void SsScene1302Fence::suMoveDown() {
-	if (_y < _firstY + 152)
-		_y += 8;
+	if (_y < _firstY + UPSCALE_Y(152))
+		_y += UPSCALE_Y(8);
 	else {
 		SetMessageHandler(&SsScene1302Fence::handleMessage);
 		SetSpriteUpdate(nullptr);
@@ -127,7 +127,7 @@ void SsScene1302Fence::suMoveDown() {
 
 void SsScene1302Fence::suMoveUp() {
 	if (_y > _firstY)
-		_y -= 8;
+		_y -= UPSCALE_Y(8);
 	else {
 		SetMessageHandler(&SsScene1302Fence::handleMessage);
 		SetSpriteUpdate(nullptr);
@@ -323,10 +323,10 @@ static const int kAsScene1307KeySurfacePriorities[] = {
 const uint kAsScene1307KeyPointsCount = 12;
 
 static const NPoint kAsScene1307KeyPoints[] = {
-	{-2,  0}, {-5,  0}, { 5,  0},
-	{12,  0}, {17,  0}, {25,  0},
-	{16, -2}, {10, -6}, { 0, -7},
-	{-7, -3}, {-3,  4}, { 2,  2}
+	{UPSCALE(-2, 0)}, {UPSCALE(-5, 0)}, {UPSCALE(5, 0)},
+	{UPSCALE(12, 0)}, {UPSCALE(17, 0)}, {UPSCALE(25, 0)},
+	{UPSCALE(16, -2)}, {UPSCALE(10, -6)}, {UPSCALE(0, -7)},
+	{UPSCALE(-7, -3)}, {UPSCALE(-3, 4)}, {UPSCALE(2, 2)}
 };
 
 const uint kAsScene1307KeyFrameIndicesCount = 20;
@@ -337,8 +337,8 @@ static const int16 kAsScene1307KeyFrameIndices[] = {
 };
 
 const int kAsScene1307KeyDivValue = 200;
-const int16 kAsScene1307KeyXDelta = 70;
-const int16 kAsScene1307KeyYDelta = -12;
+const int16 kAsScene1307KeyXDelta = UPSCALE_X(70);
+const int16 kAsScene1307KeyYDelta = UPSCALE_Y(-12);
 
 AsScene1307Key::AsScene1307Key(NeverhoodEngine *vm, Scene *parentScene, uint keyIndex, NRect *clipRects)
 	: AnimatedSprite(vm, 1100), _parentScene(parentScene), _keyIndex(keyIndex), _clipRects(clipRects),

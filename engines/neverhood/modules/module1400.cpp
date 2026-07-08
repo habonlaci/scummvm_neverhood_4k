@@ -673,7 +673,7 @@ uint32 Scene1404::handleMessage(int messageNum, const MessageParam &param, Entit
 	switch (messageNum) {
 	case NM_ANIMATION_START:
 		if (param.asInteger() == 0x410650C2) {
-			if (_asProjector && _asProjector->getX() == 220)
+			if (_asProjector && _asProjector->getX() == UPSCALE_X(220))
 				setMessageList(0x004B8C40);
 			else
 				setMessageList(0x004B8CE8);

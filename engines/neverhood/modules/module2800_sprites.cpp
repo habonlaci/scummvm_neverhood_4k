@@ -132,7 +132,7 @@ AsScene2803Rope::AsScene2803Rope(NeverhoodEngine *vm, Scene *parentScene, int16 
 	startAnimation(0x9D098C23, 35, 53);
 	NextState(&AsScene2803Rope::stReleased);
 	_x = x;
-	_y = -276;
+	_y = UPSCALE_Y(-276);
 }
 
 uint32 AsScene2803Rope::handleMessage(int messageNum, const MessageParam &param, Entity *sender) {
@@ -923,7 +923,7 @@ AsScene2810Rope::AsScene2810Rope(NeverhoodEngine *vm, Scene *parentScene, int16 
 	SetMessageHandler(&AsScene2810Rope::handleMessage);
 	SetSpriteUpdate(&AnimatedSprite::updateDeltaXY);
 	_x = x;
-	_y = -276;
+	_y = UPSCALE_Y(-276);
 	startAnimation(0x9D098C23, 35, 53);
 }
 

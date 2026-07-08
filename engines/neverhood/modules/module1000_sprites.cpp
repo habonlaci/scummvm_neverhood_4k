@@ -264,7 +264,7 @@ AsScene1002Ring::AsScene1002Ring(NeverhoodEngine *vm, Scene *parentScene, bool i
 		SetMessageHandler(&AsScene1002Ring::hmRingIdle);
 	}
 
-	setClipRect(0, clipY1, UPSCALE(640, 480));
+	setClipRect(UPSCALE_X(0), clipY1, UPSCALE(640, 480));
 
 	_x = x;
 	_y = y;

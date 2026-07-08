@@ -302,7 +302,7 @@ uint32 AsCommonProjector::handleMessage(int messageNum, const MessageParam &para
 		messageResult = 1;
 		break;
 	case NM_KLAYMEN_RAISE_LEVER:
-		setGlobalVar(V_PROJECTOR_SLOT, (_x - _asProjectorItem->point.x) / 108);
+		setGlobalVar(V_PROJECTOR_SLOT, (_x - _asProjectorItem->point.x) / UPSCALE_X(108));
 		if ((int8)getGlobalVar(V_PROJECTOR_SLOT) == _asProjectorItem->lockSlotIndex)
 			stStartLockedInSlot();
 		else
@@ -397,9 +397,9 @@ uint32 AsCommonProjector::hmAnimation(int messageNum, const MessageParam &param,
 
 void AsCommonProjector::suMoving() {
 	if (_x <= _klaymen->getX())
-		_x = _klaymen->getX() - 100;
+		_x = _klaymen->getX() - UPSCALE_X(100);
 	else
-		_x = _klaymen->getX() + 100;
+		_x = _klaymen->getX() + UPSCALE_X(100);
 	moveProjector();
 	if (_beforeMoveX == _x) {
 		if (getGlobalVar(V_PROJECTOR_SLOT) == 0 && _asProjectorItem->leftBorderLeaves != 0) {
