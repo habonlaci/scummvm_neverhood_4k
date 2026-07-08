@@ -27,6 +27,36 @@ def is_flat(im):
     return all(a == b for a, b in im.convert('RGB').getextrema())
 
 
+def bleed_colors(rgb, alpha, iterations=8):
+    """Spread edge colors into fully transparent areas so the SR model
+    doesn't smear the (invisible, often garish) under-color into visible
+    edge pixels. Pure numpy dilation."""
+    rgb = rgb.astype(np.float32)
+    known = alpha > 0
+    for _ in range(iterations):
+        if known.all():
+            break
+        acc = np.zeros_like(rgb)
+        cnt = np.zeros(known.shape, np.float32)
+        for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+            k = np.roll(known, (dy, dx), (0, 1))
+            r = np.roll(rgb, (dy, dx), (0, 1))
+            if dy == 1:
+                k[0, :] = False
+            if dy == -1:
+                k[-1, :] = False
+            if dx == 1:
+                k[:, 0] = False
+            if dx == -1:
+                k[:, -1] = False
+            acc += r * k[..., None]
+            cnt += k
+        fill = ~known & (cnt > 0)
+        rgb[fill] = acc[fill] / cnt[fill, None]
+        known |= fill
+    return rgb.astype(np.uint8)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--model', required=True)
@@ -52,16 +82,30 @@ def main():
         for i, f in enumerate(files):
             im = Image.open(os.path.join(args.src, f))
             rgba = im.convert('RGBA')
-            rgb = np.asarray(rgba)[:, :, :3]
-            x = torch.from_numpy(rgb.copy()).permute(2, 0, 1).unsqueeze(0)
-            x = x.float().div(255).cuda()
-            y = model(x)
-            out = (y.squeeze(0).permute(1, 2, 0).clamp(0, 1).cpu().numpy()
-                   * 255).astype(np.uint8)
-            res = Image.fromarray(out, 'RGB').convert('RGBA')
-            alpha = rgba.getchannel('A').resize(
-                (rgba.width * scale, rgba.height * scale), Image.LANCZOS)
-            res.putalpha(alpha)
+            arr = np.asarray(rgba)
+            rgb, a = arr[:, :, :3], arr[:, :, 3]
+            has_alpha = (a < 255).any()
+            if has_alpha:
+                # avoid the model smearing hidden under-colors into edges
+                rgb = bleed_colors(rgb, a)
+
+            def run(np_img):
+                x = torch.from_numpy(np_img.copy()).permute(2, 0, 1)
+                x = x.unsqueeze(0).float().div(255).cuda()
+                y = model(x)
+                return (y.squeeze(0).permute(1, 2, 0).clamp(0, 1)
+                        .cpu().numpy() * 255).astype(np.uint8)
+
+            res = Image.fromarray(run(rgb), 'RGB').convert('RGBA')
+            if has_alpha:
+                # alpha through the model too: smooth, unjagged edges
+                a3 = np.repeat(a[:, :, None], 3, axis=2)
+                alpha_up = Image.fromarray(run(a3)[:, :, 0], 'L')
+            else:
+                alpha_up = Image.fromarray(
+                    np.full((rgba.height * scale, rgba.width * scale),
+                            255, np.uint8), 'L')
+            res.putalpha(alpha_up)
             res.save(os.path.join(args.out, f))
             if is_flat(res) and not is_flat(im):
                 problems += 1

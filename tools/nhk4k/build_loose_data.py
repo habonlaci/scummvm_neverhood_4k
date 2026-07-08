@@ -66,18 +66,22 @@ def convert_video(ffmpeg, src, dst, factor, quality):
     probe0 = subprocess.run([ffmpeg, "-i", src], capture_output=True, text=True)
     eff = factor * 2 if " 320x240" in probe0.stderr else factor
     tmp = dst + ".video.ogv"
-    dec = subprocess.Popen(
-        [ffmpeg, "-y", "-loglevel", "error", "-i", src,
-         "-vf", f"scale=iw*{eff}:ih*{eff}:flags=lanczos,format=yuv420p",
-         "-f", "yuv4mpegpipe", "-"],
-        stdout=subprocess.PIPE)
+    # single shell pipeline: avoids Python-managed pipe handle inheritance,
+    # which breaks under ProcessPoolExecutor on Windows
     enc = subprocess.run(
-        [FFMPEG2THEORA, "-", "-v", str(quality), "--no-skeleton", "-o", tmp],
-        stdin=dec.stdout, capture_output=True, text=True)
-    dec.stdout.close()
-    dec.wait()
-    if enc.returncode != 0 or dec.returncode != 0 or not os.path.isfile(tmp):
+        f'"{ffmpeg}" -y -loglevel error -i "{src}" '
+        f'-vf "scale=iw*{eff}:ih*{eff}:flags=lanczos,format=yuv420p" '
+        f'-f yuv4mpegpipe - | "{FFMPEG2THEORA}" - -v {quality} --no-skeleton -o "{tmp}"',
+        shell=True, capture_output=True, text=True)
+    # ffmpeg2theora 0.29 segfaults on exit AFTER writing a complete file, so
+    # judge success by validating the output instead of the exit code.
+    if not os.path.isfile(tmp) or os.path.getsize(tmp) == 0:
         raise RuntimeError(f"{os.path.basename(src)}: {enc.stderr.strip()[-200:]}")
+    chk = subprocess.run([ffmpeg, "-v", "error", "-i", tmp, "-f", "null", "-"],
+                         capture_output=True, text=True)
+    if chk.stderr.strip():
+        os.remove(tmp)
+        raise RuntimeError(f"{os.path.basename(src)} invalid: {chk.stderr.strip()[:200]}")
     probe = subprocess.run([ffmpeg, "-i", src], capture_output=True, text=True)
     if "Audio:" in probe.stderr:
         mux = subprocess.run(

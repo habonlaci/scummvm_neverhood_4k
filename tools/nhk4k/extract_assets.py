@@ -70,7 +70,7 @@ def _require_pillow():
 
 
 def indices_to_rgba(Image, indices, width, height, rgb_palette,
-                    index0_transparent):
+                    index0_transparent, shadow64=False):
     img = Image.frombytes("P", (width, height), bytes(indices))
     flat = []
     for r, g, b in rgb_palette:
@@ -79,9 +79,21 @@ def indices_to_rgba(Image, indices, width, height, rgb_palette,
     img = img.convert("RGBA")
     if index0_transparent:
         # alpha 0 wherever the source index was 0 (the engine's transparent
-        # color for sprites / untouched RLE pixels)
-        alpha = bytes(0 if i == 0 else 255 for i in indices)
+        # color for sprites / untouched RLE pixels).
+        # Index 64 is the engine's reserved shadow color in animations
+        # (scenes call setRepl(64, 0) at runtime, which RGBA replacements
+        # bypass): bake it as translucent black so shadows look right.
+        alpha = bytes(0 if i == 0 else (110 if shadow64 and i == 64 else 255)
+                      for i in indices)
         img.putalpha(Image.frombytes("L", (width, height), alpha))
+        if shadow64 and 64 in indices:
+            px = img.load()
+            k = 0
+            for y in range(height):
+                for x in range(width):
+                    if indices[k] == 64:
+                        px[x, y] = (0, 0, 0, 110)
+                    k += 1
     return img
 
 
@@ -182,7 +194,7 @@ def extract_animation(Image, rs, entry, file_hash, out_dir, ext_palette):
             indices = nhk.unpack_sprite_rle(sprite_data[fr.sprite_data_offs:],
                                             fr.width, fr.height)
             img = indices_to_rgba(Image, indices, fr.width, fr.height, rgb,
-                                  True)
+                                  True, shadow64=True)
             img.save(os.path.join(out_dir, "%s-%03d.png" % (name, i)))
             written += 1
     return "%s: anims [%s], %d/%d frames, palette=%s" % (
