@@ -54,7 +54,7 @@ def upscale_one(src, dst, factor):
 
 def convert_video(ffmpeg, src, dst, factor, quality):
     cmd = [ffmpeg, "-y", "-loglevel", "error", "-i", src,
-           "-vf", f"scale=iw*{factor}:ih*{factor}:flags=lanczos",
+           "-vf", f"scale=iw*{factor}:ih*{factor}:flags=lanczos,format=yuv420p",
            "-c:v", "libtheora", "-q:v", str(quality)]
     # some SMKs have no audio track; map audio only if present
     probe = subprocess.run([ffmpeg, "-i", src], capture_output=True, text=True)
