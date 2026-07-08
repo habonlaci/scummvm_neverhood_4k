@@ -285,3 +285,16 @@ android_project
 dists/emscripten/libs/
 dists/emscripten/games/
 dists/emscripten/emsdk-*
+
+# --- Neverhood 4K: NEVER commit game assets (legal constraint) ---
+/image/
+/extracted/
+/upscaled/
+/mods/
+*.blb
+*.BLB
+*.ogv
+*.smk
+*.SMK
+manifest.json
+/loosedata/
