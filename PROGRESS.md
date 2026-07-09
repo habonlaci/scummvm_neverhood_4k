@@ -27,8 +27,9 @@ Open items:
 - 59 bitmaps with runtime-selected palettes unmapped (modules
   2200/2500/2700/2800; may show gray in late areas). 182 further
   unmapped bitmaps are unreferenced/dead assets.
-- Video AI pass running; Lanczos versions remain as automatic fallback
-  (backups in videos_lanczos_backup/).
+- ~~Video AI pass~~ DONE: all 551 videos AI-upscaled (animevideov3),
+  550/550 verified, 0 failures; Lanczos backups in
+  videos_lanczos_backup/.
 - ScummVM launcher GUI theme/font warning (cosmetic only).
 - Playtest of puzzle scenes after coordinate fixes.
 - Later phases: model quality bake-off per asset class, SUPIR
