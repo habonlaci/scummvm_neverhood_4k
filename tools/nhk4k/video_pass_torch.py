@@ -17,15 +17,13 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nhk4k_paths as P
 
-BATCH = 8
-
-
 def run(cmd, **kw):
     return subprocess.run(cmd, capture_output=True, text=True, **kw)
 
 
 def worker(job):
-    weights, smk, dst, quality = job
+    weights, smk, dst, quality, BATCH = job
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     import numpy as np
     import torch
     from PIL import Image
@@ -34,6 +32,9 @@ def worker(job):
         _MODEL
     except NameError:
         from spandrel import ModelLoader
+        # hard-cap this process's VRAM share: allocator raises OOM instead
+        # of silently spilling into (slow) shared system memory
+        torch.cuda.set_per_process_memory_fraction(0.28, 0)
         _MODEL = ModelLoader().load_from_file(weights).cuda().eval()
         torch.backends.cudnn.benchmark = True
     model = _MODEL
@@ -57,16 +58,28 @@ def worker(job):
         if r.returncode != 0:
             raise RuntimeError("extract: " + r.stderr[-120:])
         files = sorted(os.listdir(fr))
+        def infer(chunk):
+            arrs = [np.asarray(Image.open(os.path.join(fr, f)).convert("RGB"))
+                    for f in chunk]
+            x = torch.from_numpy(np.stack(arrs)).permute(0, 3, 1, 2)
+            x = x.float().div(255).cuda()
+            y = model(x).clamp(0, 1).mul(255).byte().permute(0, 2, 3, 1).cpu().numpy()
+            for f, o in zip(chunk, y):
+                Image.fromarray(o, "RGB").save(os.path.join(up, f))
+
         with torch.inference_mode():
-            for i in range(0, len(files), BATCH):
-                chunk = files[i:i + BATCH]
-                arrs = [np.asarray(Image.open(os.path.join(fr, f)).convert("RGB"))
-                        for f in chunk]
-                x = torch.from_numpy(np.stack(arrs)).permute(0, 3, 1, 2)
-                x = x.float().div(255).cuda()
-                y = model(x).clamp(0, 1).mul(255).byte().permute(0, 2, 3, 1).cpu().numpy()
-                for f, o in zip(chunk, y):
-                    Image.fromarray(o, "RGB").save(os.path.join(up, f))
+            i = 0
+            batch = BATCH
+            while i < len(files):
+                chunk = files[i:i + batch]
+                try:
+                    infer(chunk)
+                    i += len(chunk)
+                except torch.cuda.OutOfMemoryError:
+                    torch.cuda.empty_cache()
+                    if batch == 1:
+                        raise
+                    batch = max(1, batch // 2)
         tmp = os.path.join(td, "v.ogv")
         subprocess.run(
             f'"{P.FFMPEG}" -y -loglevel error -framerate {fps} '
@@ -102,6 +115,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--quality", type=int, default=8)
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--batch", type=int, default=4)
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -113,7 +127,7 @@ def main():
         if os.path.isfile(dst) and os.path.getsize(dst) > 0:
             continue
         jobs.append((args.model, os.path.join(args.smk_dir, f), dst,
-                     args.quality))
+                     args.quality, args.batch))
     print(f"{len(jobs)} videos to do", flush=True)
 
     from concurrent.futures import ProcessPoolExecutor, as_completed
