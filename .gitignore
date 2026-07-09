@@ -298,3 +298,4 @@ dists/emscripten/emsdk-*
 *.SMK
 manifest.json
 /loosedata/
+tools/nhk4k/__pycache__/
