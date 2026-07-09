@@ -17,10 +17,14 @@ import subprocess
 import sys
 import tempfile
 
-FFMPEG = r"C:\msys64\mingw64\bin\ffmpeg.exe"
-FFPROBE = r"C:\msys64\mingw64\bin\ffprobe.exe"
-F2T = r"C:\Users\apa\neverhood4k\aitools\ffmpeg2theora.exe"
-ESRGAN = r"C:\Users\apa\neverhood4k\aitools\realesrgan-ncnn-vulkan.exe"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import nhk4k_paths as P
+
+FFMPEG = P.FFMPEG
+FFPROBE = P.FFPROBE
+F2T = P.FFMPEG2THEORA
+ESRGAN = P.REALESRGAN_NCNN
 
 
 def run(cmd, **kw):
@@ -98,11 +102,10 @@ def convert(smk, dst, quality):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--smk-dir", default=r"C:\Users\apa\neverhood4k\extracted\video")
+    ap.add_argument("--smk-dir", default=os.path.join(P.EXTRACTED, "video"))
     ap.add_argument("--out-dir",
-                    default=r"C:\Users\apa\neverhood4k\image\DATA\loose_4k\videos")
-    ap.add_argument("--backup",
-                    default=r"C:\Users\apa\neverhood4k\videos_lanczos_backup")
+                    default=os.path.join(P.DATA_DIR, "loose_4k", "videos"))
+    ap.add_argument("--backup", default=P.VIDEO_BACKUP)
     ap.add_argument("--quality", type=int, default=8)
     ap.add_argument("--skip", action="append", default=[],
                     help="hashes to leave untouched (e.g. already AI-done)")

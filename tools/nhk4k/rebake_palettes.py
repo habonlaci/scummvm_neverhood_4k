@@ -21,7 +21,7 @@ Re-runnable; only touches hashes present in the map (or those given with
 --hash).
 
 Usage:
-  python rebake_palettes.py [--map C:/Users/apa/neverhood4k/palette_map.json]
+  python rebake_palettes.py [--map <path-to>/palette_map.json]
                             [--data-dir DIR] [--images DIR] [--factor 4]
                             [--hash HHHHHHHH ...] [--dry-run]
 """
@@ -35,9 +35,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import nhk4k_lib as nhk
+import nhk4k_paths as P
 
-DEFAULT_DATA_DIR = r"C:\Users\apa\neverhood4k\image\DATA"
-DEFAULT_MAP = r"C:\Users\apa\neverhood4k\palette_map.json"
+DEFAULT_DATA_DIR = P.DATA_DIR
+DEFAULT_MAP = P.PALETTE_MAP
 DEFAULT_IMAGES = os.path.join(DEFAULT_DATA_DIR, "loose_4k", "images")
 
 REPO_ROOT = os.path.normcase(os.path.abspath(

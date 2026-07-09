@@ -48,11 +48,15 @@ import sys
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+
+import nhk4k_paths as P
+
 REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 DEFAULT_ENGINE = os.path.join(REPO_ROOT, "engines", "neverhood")
-DEFAULT_MANIFEST = r"C:\Users\apa\neverhood4k\manifest.json"
-DEFAULT_OUT = r"C:\Users\apa\neverhood4k\palette_map.json"
-DEFAULT_DAT = r"C:\Users\apa\neverhood4k\scummvm_extras\neverhood.dat"
+DEFAULT_MANIFEST = P.MANIFEST
+DEFAULT_OUT = P.PALETTE_MAP
+DEFAULT_DAT = P.NEVERHOOD_DAT
 
 HEX_RE = re.compile(r"0[xX]([0-9A-Fa-f]{7,8})\b")
 METHOD_RE = re.compile(r"^[\w:<>~ \t\*&]*?\b(\w+)::(~?\w+)\s*\(", re.M)

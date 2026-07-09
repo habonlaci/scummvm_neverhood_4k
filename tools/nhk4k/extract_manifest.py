@@ -24,8 +24,8 @@ the newest timestamp wins across archives, comprType 0x65 links resolved):
   link_target    for link entries (hash of the entry it redirects to)
 
 Usage:
-  python extract_manifest.py --data-dir C:/Users/apa/neverhood4k/image/DATA
-                             [--out C:/Users/apa/neverhood4k/manifest.json]
+  python extract_manifest.py --data-dir <path-to>/image/DATA
+                             [--out <path-to>/manifest.json]
 
 The manifest is written OUTSIDE the repo by default; never point --out
 into the source tree.
@@ -42,9 +42,10 @@ from collections import Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import nhk4k_lib as nhk
+import nhk4k_paths as P
 
-DEFAULT_DATA_DIR = r"C:\Users\apa\neverhood4k\image\DATA"
-DEFAULT_OUT = r"C:\Users\apa\neverhood4k\manifest.json"
+DEFAULT_DATA_DIR = P.DATA_DIR
+DEFAULT_OUT = P.MANIFEST
 
 
 def bitmap_info(rs: nhk.ResourceSet, entry: nhk.BlbEntry) -> dict:

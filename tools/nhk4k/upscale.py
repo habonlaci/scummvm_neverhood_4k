@@ -27,11 +27,15 @@ import urllib.request
 
 PY = sys.executable
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = r"C:\Users\apa\neverhood4k"
-DATA = os.path.join(ROOT, "image", "DATA")
-EXTRACTED = os.path.join(ROOT, "extracted")
-STAGE = os.path.join(ROOT, "stage1x")
-AITOOLS = os.path.join(ROOT, "aitools")
+sys.path.insert(0, HERE)
+
+import nhk4k_paths as P
+
+ROOT = P.ROOT
+DATA = P.DATA_DIR
+EXTRACTED = P.EXTRACTED
+STAGE = P.STAGE
+AITOOLS = P.AITOOLS
 FACTOR = 4
 
 HF = "https://huggingface.co/{repo}/resolve/main/{file}"

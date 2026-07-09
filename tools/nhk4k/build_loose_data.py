@@ -28,10 +28,14 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_DATA = r"C:\Users\apa\neverhood4k\image\DATA"
+sys.path.insert(0, HERE)
+
+import nhk4k_paths as P
+
+DEFAULT_DATA = P.DATA_DIR
 DEFAULT_OUT = os.path.join(DEFAULT_DATA, "loose_4k")
-DEFAULT_WORK = r"C:\Users\apa\neverhood4k\extracted"
-DEFAULT_FFMPEG = r"C:\msys64\mingw64\bin\ffmpeg.exe"
+DEFAULT_WORK = P.EXTRACTED
+DEFAULT_FFMPEG = P.FFMPEG
 
 REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 
@@ -52,7 +56,7 @@ def upscale_one(src, dst, factor):
     return dst
 
 
-FFMPEG2THEORA = r"C:\Users\apa\neverhood4k\aitools\ffmpeg2theora.exe"
+FFMPEG2THEORA = P.FFMPEG2THEORA
 
 
 def convert_video(ffmpeg, src, dst, factor, quality):

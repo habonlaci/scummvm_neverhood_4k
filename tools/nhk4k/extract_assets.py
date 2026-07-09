@@ -11,7 +11,7 @@ Selection:
                       text, sound, music, video (repeatable)
   --limit N           stop after N extracted resources (safety valve)
 
-Output (never inside the repo, default C:/Users/apa/neverhood4k/extracted):
+Output (never inside the repo, default <NHK4K_ROOT>/extracted):
   bitmaps     <out>/bitmap/HHHHHHHH.png          (RGBA; palette applied;
               index 0 transparent for sprites -- see --opaque)
   animations  <out>/animation/HHHHHHHH-000.png ... (one PNG per frame)
@@ -52,9 +52,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import nhk4k_lib as nhk
+import nhk4k_paths as P
 
-DEFAULT_DATA_DIR = r"C:\Users\apa\neverhood4k\image\DATA"
-DEFAULT_OUT = r"C:\Users\apa\neverhood4k\extracted"
+DEFAULT_DATA_DIR = P.DATA_DIR
+DEFAULT_OUT = P.EXTRACTED
 
 REPO_ROOT = os.path.normcase(os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")))
