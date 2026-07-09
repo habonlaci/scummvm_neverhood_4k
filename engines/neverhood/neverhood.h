@@ -65,8 +65,13 @@ struct GameState {
 class ConfigData {
 public:
 	const char* section = "Config";
-	int16 upscaleDividend = 9;
-	int16 upscaleDivisor = 2;
+	// NOTE: static coordinate tables in the modules use UPSCALE() in their
+	// initializers, which run BEFORE neverhood.ini is loaded - they freeze
+	// at these defaults. Keep the defaults equal to the shipped factor
+	// (4/1); changing the factor only in the ini misplaces those tables
+	// by the defaults/ini ratio.
+	int16 upscaleDividend = 4;
+	int16 upscaleDivisor = 1;
 	bool isLooseData = true;
 	Common::String looseDataFolder = "loose_4k";
 
